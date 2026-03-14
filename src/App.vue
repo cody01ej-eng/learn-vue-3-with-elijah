@@ -1,68 +1,62 @@
 <template>
-  <h1>{{ message }}</h1>
-  <div class="card">
-    <h2 ref="title">This is the App component.</h2>
-    <h2>Number: {{ number }}</h2>
-    <button @click="number++">Increment number by one</button>
-    <button @click="isShow = !isShow">Toggle component1</button>
-    <Component1 v-if="isShow"></Component1>
-  </div>
+  <StudentList :list="list">
+    <template #default="{ stu }">
+      <span :class="{ cursed: stu.name == 'Harry' }">
+        {{ stu.name }}
+      </span>
+    </template>
+  </StudentList>
+
+  <hr />
+
+  <el-table :data="todoList" stripe border style="width: 100%">
+    <el-table-column prop="userId" label="User ID" width="180" />
+    <el-table-column prop="id" label="ID" width="180" />
+    <el-table-column prop="title" label="Title" />
+    <el-table-column prop="completed" label="Status">
+      <template #default="slotProps">
+        <el-tag type="success" v-if="slotProps.row.completed">Completed</el-tag>
+        <el-tag type="danger" v-else>Incomplete</el-tag>
+      </template>
+    </el-table-column>
+  </el-table>
 </template>
 
 <script setup>
-import {
-  ref,
-  onBeforeMount,
-  onMounted,
-  onBeforeUpdate,
-  onUpdated,
-  onBeforeUnmount,
-  onUnmounted,
-  watch
-} from 'vue'
+import { onMounted, ref } from 'vue'
+import StudentList from './StudentList.vue'
 
-import Component1 from './Component1.vue'
+const list = ref([
+  {
+    id: 1,
+    name: 'Harry'
+  },
+  {
+    id: 2,
+    name: 'Hermione'
+  },
+  {
+    id: 3,
+    name: 'Ron'
+  }
+])
 
-let message = ref('Hello, Lifecycle Hooks!')
+const todoList = ref([])
 
-let number = ref(1)
-let title = ref(null)
+async function getTodoList() {
+  const response = await fetch('https://jsonplaceholder.typicode.com/todos')
+  const data = await response.json()
+  console.log(data)
+  todoList.value = data
+}
 
-let isShow = ref(true)
-
-console.log('App component is setup.')
-
-onBeforeMount(() => {
-  console.log('App component is before mount.')
-  console.log(number.value) 
-  console.log(title.value) 
-})
 onMounted(() => {
-  console.log('App component is mounted.')
-  console.log(title.value) 
-})
-onBeforeUpdate(() => {
-  console.log('App component is before update.')
-})
-onUpdated(() => {
-  console.log('App component is updated.')
-})
-onBeforeUnmount(() => {
-  console.log('App component is before unmount.')
-})
-onUnmounted(() => {
-  console.log('App component is unmounted.')
-})
-watch(number, () => {
-  console.log('number changes!')
+  getTodoList()
 })
 </script>
 
 <style scoped>
-.card {
-  background-color: purple;
-  color: white;
-  padding: 20px 10px;
-  margin-bottom: 10px;
+.cursed {
+  color: red;
 }
 </style>
